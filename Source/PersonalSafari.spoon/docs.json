@@ -1,0 +1,10 @@
+[
+  {
+    "name": "PersonalSafari",
+    "desc": "Shift-click links into a chosen Safari window across desktops.",
+    "doc": "Shift-click links into a chosen Safari window across desktops.",
+    "type": "Module",
+    "items": [],
+    "version": "1.0.2"
+  }
+]

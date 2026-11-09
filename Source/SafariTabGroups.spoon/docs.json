@@ -1,0 +1,10 @@
+[
+  {
+    "name": "SafariTabGroups",
+    "desc": "Search and switch tab groups in the current Safari window.",
+    "doc": "Search and switch tab groups in the current Safari window.",
+    "type": "Module",
+    "items": [],
+    "version": "1.0.0"
+  }
+]

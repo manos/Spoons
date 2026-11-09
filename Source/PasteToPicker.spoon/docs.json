@@ -1,0 +1,10 @@
+[
+  {
+    "name": "PasteToPicker",
+    "desc": "Select a clipboard image in a native macOS file picker.",
+    "doc": "Select a clipboard image in a native macOS file picker.",
+    "type": "Module",
+    "items": [],
+    "version": "1.0.2"
+  }
+]
