@@ -4,7 +4,7 @@ Three keyboard-driven [Hammerspoon](https://www.hammerspoon.org/) plugins for Sa
 
 - **[SafariTabGroups](Source/SafariTabGroups.spoon/README.md)** — press **⌃⌥⌘L**, type to filter Safari's tab groups, select with ↑/↓ and Enter. Escape dismisses. [Download](https://github.com/manos/Spoons/raw/main/Spoons/SafariTabGroups.spoon.zip).
 - **[PersonalSafari](Source/PersonalSafari.spoon/README.md)** — select a Safari window with **⌃⌥⌘P**, then Shift-click links to send them there as background tabs, even across desktops. [Download](https://github.com/manos/Spoons/raw/main/Spoons/PersonalSafari.spoon.zip).
-- **[PasteToPicker](Source/PasteToPicker.spoon/README.md)** — press **⌘⌃V** in a native file picker to select an image from the clipboard. You control the final Open/Upload action. [Download](https://github.com/manos/Spoons/raw/main/Spoons/PasteToPicker.spoon.zip).
+- **[PasteToPicker](Source/PasteToPicker.spoon/README.md)** — press **⌃⌥⌘V** in a native file picker to select an image from the clipboard. You control the final Open/Upload action. [Download](https://github.com/manos/Spoons/raw/main/Spoons/PasteToPicker.spoon.zip).
 
 All shortcuts are configurable. macOS, Hammerspoon, and Accessibility permission are required. PersonalSafari also requires permission to control Safari. These are independently distributed Spoons, not part of the official Hammerspoon collection.
 
@@ -25,7 +25,7 @@ spoon.PersonalSafari:bindHotkeys({
 
 hs.loadSpoon("PasteToPicker")
 spoon.PasteToPicker:bindHotkeys({
-  pasteImageToPicker = {{"cmd", "ctrl"}, "V"},
+  pasteImageToPicker = {{"ctrl", "alt", "cmd"}, "V"},
 })
 ```
 

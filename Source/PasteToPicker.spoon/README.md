@@ -9,11 +9,13 @@ Install `PasteToPicker.spoon` in `~/.hammerspoon/Spoons/`, then add:
 ```lua
 hs.loadSpoon("PasteToPicker")
 spoon.PasteToPicker:bindHotkeys({
-  pasteImageToPicker = {{"cmd", "ctrl"}, "V"},
+  pasteImageToPicker = {{"ctrl", "alt", "cmd"}, "V"},
 })
 ```
 
-Copy an image, open the app's file picker, press Command–Control–V, and release the keys. The Spoon saves a PNG, selects its path, and leaves the final Open/Upload action to you. Hammerspoon needs Accessibility permission.
+Copy an image, open the app's file picker, press Control–Option–Command–V, and release the keys. The Spoon saves a PNG, selects its path, and leaves the final Open/Upload action to you. Hammerspoon needs Accessibility permission.
+
+Calling `spoon.PasteToPicker:bindHotkeys()` without a mapping uses this default. With SpoonInstall, use `hotkeys = "default"`. Explicit mappings remain supported.
 
 It waits for modifier release and the native path field, verifies the typed filename, then confirms the path. It cancels on an app switch or timeout. The clipboard stays unchanged. Tested interactively in Safari; custom file pickers and Save dialogs are not supported.
 

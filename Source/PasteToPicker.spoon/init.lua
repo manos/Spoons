@@ -11,10 +11,11 @@
 
 local obj = {
   name = "PasteToPicker",
-  version = "1.0.2",
+  version = "1.0.3",
   author = "manos",
   license = "MIT - see LICENSE",
   homepage = "https://github.com/manos/Spoons",
+  defaultHotkeys = {pasteImageToPicker = {{"ctrl", "alt", "cmd"}, "V"}},
 }
 
 local SAVE_DIR    = "/tmp"
@@ -156,11 +157,11 @@ end
 
 --- PasteToPicker:bindHotkeys(mapping) -> self
 --- Method
---- Bind the pasteImageToPicker shortcut.
+--- Bind the pasteImageToPicker shortcut; defaults to Ctrl-Option-Command-V.
 function obj:bindHotkeys(mapping)
   hs.spoons.bindHotkeysToSpec({
     pasteImageToPicker = function() self:pasteImageToPicker() end,
-  }, mapping)
+  }, mapping or self.defaultHotkeys)
   return self
 end
 

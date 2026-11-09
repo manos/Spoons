@@ -5,6 +5,6 @@
     "doc": "Select a clipboard image in a native macOS file picker.",
     "type": "Module",
     "items": [],
-    "version": "1.0.2"
+    "version": "1.0.3"
   }
 ]
