@@ -1,0 +1,21 @@
+Lily voice clips - elevenlabs.io
+
+Applies to muted.wav and unmuted.wav only.
+
+These synthetic voice clips were generated using ElevenLabs' Lily voice on
+the free plan. They are not covered by this repository's MIT license.
+They are provided for noncommercial use with attribution to elevenlabs.io.
+Do not redistribute them on terms more permissive than ElevenLabs allows.
+
+Titles:
+  Muted - elevenlabs.io
+  Unmuted - elevenlabs.io
+
+Retain the attribution when sharing these clips. For commercial uses, replace
+them with audio you have appropriate rights to use, or remove the WAV files
+to use the Spoon's system-speech fallback.
+
+ElevenLabs publishing terms:
+https://elevenlabs.io/docs/help-center/legal/can-i-publish-the-content-i-generate-on-the-platform
+https://elevenlabs.io/terms-of-use
+https://elevenlabs.io/use-policy

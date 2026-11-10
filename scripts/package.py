@@ -7,11 +7,15 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 DESCRIPTIONS = {
+    'AirPodsMeet': 'Mute or unmute Safari Google Meet with your AirPods and spoken confirmation.',
     'PasteToPicker': 'Attach a clipboard image through a native macOS file picker.',
     'PersonalSafari': 'Shift-click links into a chosen Safari window across desktops.',
     'SafariTabGroups': 'Search and switch tab groups in the current Safari window.',
 }
 FILES = ('init.lua', 'README.md', 'LICENSE', 'tests/test.lua', 'docs.json')
+EXTRA_FILES = {
+    'AirPodsMeet': ('sounds/README.md', 'sounds/LICENSE.txt', 'sounds/muted.wav', 'sounds/unmuted.wav'),
+}
 
 
 def main():
@@ -32,7 +36,7 @@ def main():
         (source / 'docs.json').write_text(json.dumps([entry], indent=2) + '\n')
         catalog.append(entry)
         with ZipFile(ROOT / 'Spoons' / f'{name}.spoon.zip', 'w') as archive:
-            for relative in FILES:
+            for relative in FILES + EXTRA_FILES.get(name, ()):
                 original = source / relative
                 if original.is_symlink() or not original.is_file():
                     raise ValueError(f'Not a regular source file: {name}/{relative}')

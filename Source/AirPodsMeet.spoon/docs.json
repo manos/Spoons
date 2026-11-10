@@ -1,0 +1,10 @@
+[
+  {
+    "name": "AirPodsMeet",
+    "desc": "Mute or unmute Safari Google Meet with your AirPods and spoken confirmation.",
+    "doc": "Mute or unmute Safari Google Meet with your AirPods and spoken confirmation.",
+    "type": "Module",
+    "items": [],
+    "version": "0.3.0"
+  }
+]
