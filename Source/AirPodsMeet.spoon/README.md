@@ -52,8 +52,7 @@ Run `spoon.AirPodsMeet:stop()` to disable the listener.
 A filtered `log stream` process listens only for the AirPods mute-request,
 rejection and app-attribution messages. No audio is captured. No logs or page
 contents are saved. Safari Accessibility is inspected only in response to a
-matching gesture. No browser extension, JavaScript permission, or menu-bar
-item is added.
+matching gesture.
 
 This uses undocumented macOS log messages and English
 Meet Accessibility labels. OS or Meet changes may break detection. A button

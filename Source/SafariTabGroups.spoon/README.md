@@ -19,7 +19,7 @@ spoon.SafariTabGroups:bindHotkeys({
 
 With Safari focused, press Control–Option–Command–L. Type to filter, use Up/Down to select, and press Return to switch. Escape dismisses the chooser. The list includes the window's ungrouped tabs and marks the current group.
 
-The shortcut does nothing outside Safari. No menu-bar item or Dock icon is added. Safari's native group menu briefly opens while its entries are read and when a selection is applied; the sidebar need not be opened. The original window must still be focused when the selection is applied. Names are read fresh on each invocation, and commands that create groups are excluded.
+The shortcut does nothing outside Safari. Safari's native group menu briefly opens while its entries are read and when a selection is applied; the sidebar need not be opened. The original window must still be focused when the selection is applied. Names are read fresh on each invocation, and commands that create groups are excluded.
 
 Requires Hammerspoon Accessibility permission and Safari's `TabGroupPickerButton`/`TabGroupPickerMenu` Accessibility controls. Tested against the locally installed Safari; these undocumented identifiers may change in later Safari versions.
 

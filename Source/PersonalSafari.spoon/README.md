@@ -26,7 +26,7 @@ spoon.PersonalSafari:bindHotkeys({
 }):start()
 ```
 
-The Spoon adds no menu-bar item and does not change the default browser just by loading. Run `spoon.PersonalSafari:makeDefaultBrowser()` once in the Hammerspoon console. Ordinary URLs explicitly open in Safari, avoiding a routing loop. An existing Hammerspoon URL callback, if present, receives ordinary URLs instead.
+The Spoon does not change the default browser just by loading. Run `spoon.PersonalSafari:makeDefaultBrowser()` once in the Hammerspoon console. Ordinary URLs explicitly open in Safari, avoiding a routing loop. An existing Hammerspoon URL callback, if present, receives ordinary URLs instead.
 
 External links can activate their default handler. `hs.dockIcon(false)` runs Hammerspoon as a background utility so it does not become an app-switcher entry when handling links. Its existing menu-bar icon still provides access to the Console. If you want the Spoon's optional setup menu, set `spoon.PersonalSafari.showMenu = true` before `:start()`.
 

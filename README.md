@@ -1,6 +1,6 @@
 # Spoons
 
-Small [Hammerspoon](https://www.hammerspoon.org/) tools for Safari and everyday macOS tasks. Each works independently, with no extra menu-bar item by default.
+Small [Hammerspoon](https://www.hammerspoon.org/) tools for Safari and everyday macOS tasks.
 
 - **[AirPodsMeet](#airpodsmeet--mute-meet-without-reaching-for-your-mac)** — Mute or unmute a Safari Google Meet call with your AirPods, with spoken confirmation.
 - **[PasteToPicker](#pastetopicker--attach-a-screenshot-without-saving-it-yourself)** — Attach a clipboard image through a file picker with **⌃⌥⌘V**.
@@ -13,7 +13,7 @@ You're walking around during a Google Meet call in Safari and want to mute or un
 
 Keep the call in Safari's selected tab and press the normal AirPods mute control. Once Meet confirms the change, a bundled Lily voice clip says **“Muted”** or **“Unmuted.”** The clips play at 95% speed after a configurable 0.6-second pause. No ElevenLabs account, API key, or voice download is needed to use the Spoon.
 
-The macOS rejection tones still play; this Spoon reacts after the rejection. Detection relies on macOS log messages and English Meet controls, and requires the call to remain in the selected Safari tab. It adds no menu-bar item and does not activate Safari.
+The macOS rejection tones still play; this Spoon reacts after the rejection. Detection relies on macOS log messages and English Meet controls, and requires the call to remain in the selected Safari tab.
 
 **Control:** AirPods mute gesture · [Download](https://github.com/manos/Spoons/raw/main/Spoons/AirPodsMeet.spoon.zip) · [Setup and details](Source/AirPodsMeet.spoon/README.md)
 
