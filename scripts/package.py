@@ -7,7 +7,7 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 DESCRIPTIONS = {
-    'PasteToPicker': 'Select a clipboard image in a native macOS file picker.',
+    'PasteToPicker': 'Attach a clipboard image through a native macOS file picker.',
     'PersonalSafari': 'Shift-click links into a chosen Safari window across desktops.',
     'SafariTabGroups': 'Search and switch tab groups in the current Safari window.',
 }

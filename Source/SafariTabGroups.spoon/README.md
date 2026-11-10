@@ -1,6 +1,10 @@
 # SafariTabGroups
 
-A searchable keyboard switcher for the tab groups available in the current Safari window. Uses Safari's own Tab Group picker through macOS Accessibility, so it follows the window's profile and does not read Safari databases or page content.
+Jump between Safari tab groups without opening the sidebar or scanning a menu. Useful when you keep separate groups for projects, research, shopping, or travel and want to switch by name.
+
+For example, press **⌃⌥⌘L**, type `trav`, and hit **Enter** to switch the current window to your Travel group. Use **↑/↓** to choose between matches and **Escape** to dismiss. The chooser includes the window's ungrouped tabs and marks the active group.
+
+It searches group names rather than individual tabs. It uses Safari's own Tab Group picker through Accessibility, follows the current window's profile, and does not read Safari databases or page content.
 
 ## Installation
 

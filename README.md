@@ -1,12 +1,40 @@
 # Spoons
 
-Three keyboard-driven [Hammerspoon](https://www.hammerspoon.org/) plugins for Safari and native macOS file pickers. No extra menu-bar items by default.
+Three small [Hammerspoon](https://www.hammerspoon.org/) tools for moments when Safari makes you reach for the mouse or save a file just to use it once. Each works independently, with configurable shortcuts and no extra menu-bar item by default.
 
-- **[SafariTabGroups](Source/SafariTabGroups.spoon/README.md)** — press **⌃⌥⌘L**, type to filter Safari's tab groups, select with ↑/↓ and Enter. Escape dismisses. [Download](https://github.com/manos/Spoons/raw/main/Spoons/SafariTabGroups.spoon.zip).
-- **[PersonalSafari](Source/PersonalSafari.spoon/README.md)** — select a Safari window with **⌃⌥⌘P**, then Shift-click links to send them there as background tabs, even across desktops. [Download](https://github.com/manos/Spoons/raw/main/Spoons/PersonalSafari.spoon.zip).
-- **[PasteToPicker](Source/PasteToPicker.spoon/README.md)** — press **⌃⌥⌘V** in a native file picker to select an image from the clipboard. You control the final Open/Upload action. [Download](https://github.com/manos/Spoons/raw/main/Spoons/PasteToPicker.spoon.zip).
+## PasteToPicker — attach a screenshot without saving it yourself
 
-All shortcuts are configurable. macOS, Hammerspoon, and Accessibility permission are required. PersonalSafari also requires permission to control Safari. These are independently distributed Spoons, not part of the official Hammerspoon collection.
+You have an image on the clipboard, but a website only offers **Choose File**. Normally you would save the image, find it in the upload dialog, and click Open. PasteToPicker handles those steps from the keyboard.
+
+For example, copy a screenshot with **Control–Shift–Command–4**, click a website's upload button, then press **⌃⌥⌘V** in the native file picker and release the keys. The Spoon saves a temporary PNG, enters its path, and presses the picker's Open/Upload button. The dialog closes and the image is handed to the app.
+
+It works with clipboard images and native macOS Open dialogs, including Safari upload pickers. It does not paste text or operate custom website file choosers. Accepting the picker may start an upload immediately; a separate Send or Publish button in the app remains yours to press.
+
+**Shortcut:** ⌃⌥⌘V · [Download](https://github.com/manos/Spoons/raw/main/Spoons/PasteToPicker.spoon.zip) · [Setup and details](Source/PasteToPicker.spoon/README.md)
+
+## PersonalSafari — keep personal links in your personal window
+
+You keep work and personal browsing in separate Safari windows, perhaps on different desktops. A personal link arrives in a chat or appears while you're browsing for work, and opening it normally puts it in the wrong window.
+
+Focus the Safari window you want to use for personal browsing and press **⌃⌥⌘P** once. Then **Shift-click a link** to add it as a background tab in that window. Your current window and desktop stay in place, so you can read the link later without interrupting what you're doing.
+
+Accessible links can be intercepted directly in Safari and other apps. The optional default-browser setup also handles external links from apps that do not expose them to Accessibility. Ordinary clicks keep their normal routing. Select the destination again after closing it or restarting Safari.
+
+**Choose destination:** ⌃⌥⌘P · **Send a link:** Shift-click · [Download](https://github.com/manos/Spoons/raw/main/Spoons/PersonalSafari.spoon.zip) · [Setup and details](Source/PersonalSafari.spoon/README.md)
+
+## SafariTabGroups — jump to a group by typing its name
+
+You organize Safari into groups such as Research, Shopping, and Travel, but switching means opening the sidebar or hunting through a menu. SafariTabGroups puts those group names in a searchable keyboard chooser.
+
+While in Safari, press **⌃⌥⌘L**, type part of a group name, and press **Enter**. Use **↑/↓** to move through matches or **Escape** to cancel. The selected group opens in the window where you invoked the shortcut.
+
+The list follows that window's available groups and profile, includes its ungrouped tabs, and marks the current group. It searches group names, not individual tab titles or browsing history.
+
+**Shortcut:** ⌃⌥⌘L · [Download](https://github.com/manos/Spoons/raw/main/Spoons/SafariTabGroups.spoon.zip) · [Setup and details](Source/SafariTabGroups.spoon/README.md)
+
+## Requirements
+
+macOS, Hammerspoon, and Accessibility permission are required. PersonalSafari also requires permission to control Safari. These are independently distributed Spoons, not part of the official Hammerspoon collection.
 
 ## Install
 
@@ -54,7 +82,7 @@ Use either manual setup or SpoonInstall for a given Spoon. SpoonInstall's `andUs
 
 This repository contains reusable source, synthetic tests, documentation, and installable archives. It does not include personal Hammerspoon configuration, settings, browser profiles, browsing history, clipboard images, diagnostic captures, or credentials.
 
-The Spoons contain no analytics or telemetry. PersonalSafari reads clicked link addresses to open them in Safari and stores the selected window/process identity and previous browser handler in local Hammerspoon settings. SafariTabGroups reads group names from Safari's native menu while the chooser is in use. PasteToPicker writes the clipboard image to a local temporary PNG and leaves final submission to the user; see its README for retention and file-permission details. Opening a web link or submitting a file through the destination application has that application's normal network behavior.
+The Spoons contain no analytics or telemetry. PersonalSafari reads clicked link addresses to open them in Safari and stores the selected window/process identity and previous browser handler in local Hammerspoon settings. SafariTabGroups reads group names from Safari's native menu while the chooser is in use. PasteToPicker writes the clipboard image to a local temporary PNG and automatically accepts the file picker, which may start an upload through the destination app; see its README for retention and file-permission details. Opening a web link or submitting a file through the destination application has that application's normal network behavior.
 
 ## Development
 
@@ -73,6 +101,6 @@ python3 -m venv .venv
 .venv/bin/python scripts/package.py
 ```
 
-Archives use an explicit file allowlist and fixed timestamps. They omit macOS extended attributes and other local metadata. Tests use synthetic data and do not control real applications. All three utilities have also been exercised interactively in Safari; Accessibility identifiers can change between macOS/Safari versions.
+Archives use an explicit file allowlist and fixed timestamps. They omit macOS extended attributes and other local metadata. Tests use synthetic data and do not control real applications. Accessibility identifiers can change between macOS/Safari versions; automated checks do not replace testing in a real native picker or Safari window.
 
 MIT licensed. See [LICENSE](LICENSE).

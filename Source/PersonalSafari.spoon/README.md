@@ -1,6 +1,8 @@
 # PersonalSafari
 
-Shift-click a web link to open it as a background tab in your chosen Safari window, even when that window is on another desktop.
+Keep personal browsing in its own window while you work elsewhere. When a link arrives in a chat or appears in your work browser, **Shift-click** it to add a background tab to your chosen Safari window—even on another desktop—without switching away from what you are doing.
+
+For example, select a personal Safari window once with **⌃⌥⌘P**. Later, Shift-click a recipe or travel link from your work desktop. It waits in the personal window for you to read later. Ordinary clicks continue to use normal routing.
 
 ## First use
 

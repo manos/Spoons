@@ -5,13 +5,13 @@
 -- focused. If the clipboard holds an image, it's saved to /tmp and the path
 -- is auto-typed into the picker via Cmd-Shift-G (Go to folder).
 --
--- One keypress => clipboard screenshot becomes the selected file.
+-- One keypress => clipboard screenshot is selected and accepted by the picker.
 --
 -- Configure shortcuts with bindHotkeys() in ~/.hammerspoon/init.lua.
 
 local obj = {
   name = "PasteToPicker",
-  version = "1.0.3",
+  version = "1.1.0",
   author = "manos",
   license = "MIT - see LICENSE",
   homepage = "https://github.com/manos/Spoons",
@@ -116,7 +116,9 @@ function obj:pasteImageToPicker()
     self.lastResult.window = identifier
     self.lastResult.pathMatches = matches
     if now() >= operation.deadline then
-      finish("timeout", "The picker didn't select the image. Please try the shortcut again.")
+      finish("timeout", operation.phase == "submission"
+        and "The picker stayed open after confirmation. Please check it."
+        or "The picker didn't select the image. Please try the shortcut again.")
       return
     end
 
@@ -141,10 +143,17 @@ function obj:pasteImageToPicker()
       hs.eventtap.keyStroke({}, "return", 0)
       transition("selection")
     elseif operation.phase == "selection" then
-      -- Confirm only the path. The user retains the final Open/Upload action.
-      if identifier == "open-panel" and attribute(openButton(window), "AXEnabled") then
-        finish("selected")
+      local button = identifier == "open-panel" and openButton(window)
+      if button and attribute(button, "AXEnabled") and modifiersReleased() then
+        -- Target the picker button directly: a second Return could reach the app.
+        transition("submission")
+        if not button:performAction("AXPress") then
+          finish("error", "Couldn't confirm the file picker. Please click Open/Upload.")
+        end
       end
+    elseif operation.phase == "submission" and not window then
+      -- This confirms picker acceptance, not completion of a network upload.
+      finish("submitted")
     end
   end
   operation.timer = hs.timer.doEvery(POLL_INTERVAL, function()

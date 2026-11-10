@@ -3,7 +3,7 @@ local failures = 0
 
 local function fixture(options)
   options = options or {}
-  local world = {now = 0, timers = {}, alerts = {}, keys = {}, typed = 0, stray = 0, selected = false}
+  local world = {now = 0, timers = {}, alerts = {}, keys = {}, typed = 0, stray = 0, selected = false, presses = 0, submitted = false}
   world.go = options.alreadyOpen or false
   world.readyAt = world.go and 0 or math.huge
   local function element(attributes)
@@ -16,13 +16,22 @@ local function fixture(options)
       end,
     }
   end
-  local button = element({AXIdentifier = "OKButton", AXEnabled = function() return world.selected end})
+  local button = element({AXIdentifier = "OKButton", AXEnabled = function() return world.selected and not options.disabled end})
+  button.performAction = function(self, action)
+    assert(action == "AXPress", "must press the picker button")
+    assert(world.selected and world.text == world.savedPath, "must select the exact image first")
+    world.presses = world.presses + 1
+    if options.pressFails then return nil end
+    if not options.stuck then world.closeAt = world.now + (options.closeDelay or 0.2) end
+    return self
+  end
   local field = element({AXIdentifier = "PathTextField", AXRole = "AXTextField", AXEnabled = true,
     AXValue = function() return world.text or "" end})
   local panel = element({AXIdentifier = options.noPicker and "ordinary-window" or "open-panel",
     AXDefaultButton = options.noPicker and nil or button, AXChildren = {button}})
   local go = element({AXIdentifier = "GoToWindow", AXChildren = {field}})
   local function currentWindow()
+    if world.submitted then return nil end
     if world.go then return world.now >= world.readyAt and go or nil end
     return panel
   end
@@ -63,7 +72,7 @@ local function fixture(options)
       end,
     },
     eventtap = {
-      checkKeyboardModifiers = function() return world.now < (options.releaseAt or 0) and {ctrl = true, cmd = true} or {} end,
+      checkKeyboardModifiers = function() return world.now < (options.releaseAt or 0) and {ctrl = true, alt = true, cmd = true} or {} end,
       keyStroke = keyStroke,
       keyStrokes = function(text)
         world.typed = world.typed + 1
@@ -79,6 +88,7 @@ local function fixture(options)
     while self.now < untilTime do
       self.now = self.now + 0.05
       if self.selectionAt and self.now >= self.selectionAt then self.selected = true; self.go = false; self.selectionAt = nil end
+      if self.closeAt and self.now >= self.closeAt then self.submitted = true; self.closeAt = nil end
       for _, timer in ipairs(self.timers) do if timer.enabled then timer.callback() end end
     end
   end
@@ -96,11 +106,12 @@ local function test(name, options, verify)
   if not ok then failures = failures + 1 end
 end
 
-test("waits for a slow picker and selects the image", {delay = 0.75}, function(w)
-  assert(w.selected, "image was not selected")
+test("waits for a slow picker and submits the image once", {delay = 0.75}, function(w, spoon)
+  assert(w.selected and w.submitted and w.presses == 1, "image was not submitted exactly once")
+  assert(spoon.lastResult.state == "submitted", "must verify that the picker closed")
   assert(w.stray == 0, "typed before the field was ready")
   local returns = 0; for _, event in ipairs(w.keys) do if event.key == "return" then returns = returns + 1 end end
-  assert(returns == 1, "must confirm the path without submitting the upload")
+  assert(returns == 1, "must use the button, not a second Return that could reach the webpage")
 end)
 test("waits for shortcut modifiers to be released", {releaseAt = 0.5}, function(w)
   assert(w.selected and w.keys[1].at >= 0.5)
@@ -121,5 +132,20 @@ test("empty clipboard does not operate the picker", {noImage = true}, function(w
 end)
 test("failed image save does not operate the picker", {saveFails = true}, function(w)
   assert(#w.keys == 0 and #w.alerts == 1)
+end)
+test("does not press a disabled Open button", {disabled = true}, function(w, spoon)
+  assert(w.presses == 0 and spoon.lastResult.state == "timeout")
+end)
+test("presses only once while the picker closes slowly", {closeDelay = 1}, function(w, spoon)
+  assert(w.presses == 1 and w.submitted and spoon.lastResult.state == "submitted")
+end)
+test("reports a failed button action without retrying", {pressFails = true}, function(w, spoon)
+  assert(w.presses == 1 and not w.submitted and spoon.lastResult.state == "error")
+end)
+test("does not report success if the picker stays open", {stuck = true}, function(w, spoon)
+  assert(w.presses == 1 and not w.submitted and spoon.lastResult.state == "timeout")
+end)
+test("changing apps after path confirmation prevents submission", {switchAt = 1.15}, function(w, spoon)
+  assert(w.presses == 0 and spoon.lastResult.state == "cancelled")
 end)
 os.exit(failures == 0 and 0 or 1)
