@@ -30,5 +30,13 @@
     "type": "Module",
     "items": [],
     "version": "1.0.0"
+  },
+  {
+    "name": "TorrentToQbit",
+    "desc": "Choose a qBittorrent category for newly downloaded torrent files.",
+    "doc": "Choose a qBittorrent category for newly downloaded torrent files.",
+    "type": "Module",
+    "items": [],
+    "version": "0.1.0"
   }
 ]

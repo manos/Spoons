@@ -11,6 +11,7 @@ DESCRIPTIONS = {
     'PasteToPicker': 'Attach a clipboard image through a native macOS file picker.',
     'PersonalSafari': 'Shift-click links into a chosen Safari window across desktops.',
     'SafariTabGroups': 'Search and switch tab groups in the current Safari window.',
+    'TorrentToQbit': 'Choose a qBittorrent category for newly downloaded torrent files.',
 }
 FILES = ('init.lua', 'README.md', 'LICENSE', 'tests/test.lua', 'docs.json')
 EXTRA_FILES = {
