@@ -1,0 +1,10 @@
+[
+  {
+    "name": "KSheet",
+    "desc": "Show the current app\u2019s menu shortcuts in a cheat sheet that closes with Escape.",
+    "doc": "Show the current app\u2019s menu shortcuts in a cheat sheet that closes with Escape.",
+    "type": "Module",
+    "items": [],
+    "version": "1.1.0"
+  }
+]

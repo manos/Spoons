@@ -3,6 +3,7 @@
 Small [Hammerspoon](https://www.hammerspoon.org/) tools for Safari and everyday macOS tasks.
 
 - **[AirPodsMeet](#airpodsmeet--mute-meet-without-reaching-for-your-mac)** — Mute or unmute a Safari Google Meet call with your AirPods, with spoken confirmation.
+- **[KSheet](#ksheet--remember-the-current-apps-shortcuts)** — See the current app's menu shortcuts with **⌃⌥⌘K**; **Escape** closes the sheet.
 - **[PasteToPicker](#pastetopicker--attach-a-screenshot-without-saving-it-yourself)** — Attach a clipboard image through a file picker with **⌃⌥⌘V**.
 - **[PersonalSafari](#personalsafari--keep-personal-links-in-your-personal-window)** — **Shift-click** links into your chosen personal Safari window, even on another desktop.
 - **[SafariTabGroups](#safaritabgroups--jump-to-a-group-by-typing-its-name)** — Search and switch Safari tab groups with **⌃⌥⌘L**.
@@ -17,6 +18,14 @@ Keep the call in Safari's selected tab and press the normal AirPods mute control
 The macOS rejection tones still play; this Spoon reacts after the rejection. Detection relies on macOS log messages and English Meet controls, and requires the call to remain in the selected Safari tab.
 
 **Control:** AirPods mute gesture · [Download](https://github.com/manos/Spoons/raw/main/Spoons/AirPodsMeet.spoon.zip) · [Setup and details](Source/AirPodsMeet.spoon/README.md)
+
+## KSheet — remember the current app's shortcuts
+
+You want to use the keyboard, but cannot remember the shortcut for a command in the app you're using. Press **⌃⌥⌘K** to see its native menu shortcuts together, organized by menu. Press **Escape**, or the same shortcut again, to close the sheet.
+
+This is a fork of [ashfinal's KSheet](https://github.com/Hammerspoon/Spoons/tree/master/Source/KSheet.spoon), retaining the upstream credits and adding Escape dismissal and an offline layout. It shows shortcuts exposed in the app's menus, rather than every hidden command or website shortcut.
+
+**Shortcut:** ⌃⌥⌘K · [Download](https://github.com/manos/Spoons/raw/main/Spoons/KSheet.spoon.zip) · [Setup and details](Source/KSheet.spoon/README.md)
 
 ## PasteToPicker — attach a screenshot without saving it yourself
 
@@ -69,6 +78,11 @@ Download a ZIP above or from [Releases](https://github.com/manos/Spoons/releases
 ```lua
 hs.loadSpoon("AirPodsMeet"):start()
 
+hs.loadSpoon("KSheet")
+spoon.KSheet:bindHotkeys({
+  toggle = {{"ctrl", "alt", "cmd"}, "K"},
+})
+
 hs.loadSpoon("SafariTabGroups")
 spoon.SafariTabGroups:bindHotkeys({
   show = {{"ctrl", "alt", "cmd"}, "L"},
@@ -118,6 +132,8 @@ The Spoons contain no analytics or telemetry. PersonalSafari reads clicked link 
 AirPodsMeet listens to a narrowly filtered local system-log stream and inspects Safari's accessible call controls after a matching gesture. It does not capture microphone audio or save logs, meeting addresses, or page contents. Its two bundled voice clips were synthesized from the fixed words “Muted” and “Unmuted”; playback is entirely local.
 
 TorrentToQbit reads new torrent files from the configured download folder and sends their metadata to your configured qBittorrent server over HTTPS. Its host and login stay in a separate private config file; session cookies stay in memory. Successful torrent hashes and timestamps are stored locally to avoid repeat uploads. Neither the config nor your downloaded files are included in the source or ZIP.
+
+KSheet reads the current app's native menu shortcuts and displays them locally. This fork loads no external scripts or styles and does not store or transmit menu contents. Its upstream attribution link is an ordinary website link.
 
 ## Development
 

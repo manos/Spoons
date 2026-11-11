@@ -8,6 +8,7 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 ROOT = Path(__file__).resolve().parents[1]
 DESCRIPTIONS = {
     'AirPodsMeet': 'Mute or unmute Safari Google Meet with your AirPods and spoken confirmation.',
+    'KSheet': 'Show the current app’s menu shortcuts in a cheat sheet that closes with Escape.',
     'PasteToPicker': 'Attach a clipboard image through a native macOS file picker.',
     'PersonalSafari': 'Shift-click links into a chosen Safari window across desktops.',
     'SafariTabGroups': 'Search and switch tab groups in the current Safari window.',
