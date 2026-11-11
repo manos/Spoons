@@ -6,6 +6,7 @@ Small [Hammerspoon](https://www.hammerspoon.org/) tools for Safari and everyday 
 - **[PasteToPicker](#pastetopicker--attach-a-screenshot-without-saving-it-yourself)** — Attach a clipboard image through a file picker with **⌃⌥⌘V**.
 - **[PersonalSafari](#personalsafari--keep-personal-links-in-your-personal-window)** — **Shift-click** links into your chosen personal Safari window, even on another desktop.
 - **[SafariTabGroups](#safaritabgroups--jump-to-a-group-by-typing-its-name)** — Search and switch Safari tab groups with **⌃⌥⌘L**.
+- **[TorrentToQbit](#torrenttoqbit--send-downloaded-torrents-to-your-server)** — Download a `.torrent`, choose a category, and send it to your qBittorrent server.
 
 ## AirPodsMeet — mute Meet without reaching for your Mac
 
@@ -47,6 +48,16 @@ The list follows that window's available groups and profile, includes its ungrou
 
 **Shortcut:** ⌃⌥⌘L · [Download](https://github.com/manos/Spoons/raw/main/Spoons/SafariTabGroups.spoon.zip) · [Setup and details](Source/SafariTabGroups.spoon/README.md)
 
+## TorrentToQbit — send downloaded torrents to your server
+
+You download a `.torrent` on your Mac, but qBittorrent runs on another machine. Instead of opening its Web UI and uploading the file manually, TorrentToQbit watches Downloads and shows a searchable list of your server's categories when a new torrent file is ready.
+
+Type to filter, use **↑/↓** to choose a category, and press **Enter** to add it. **Escape** cancels. The Spoon checks for duplicates, verifies that the torrent reached qBittorrent, and keeps the local file. Your server's category settings and completion automations still apply.
+
+Keep the server address and Web UI login in a separate private JSON file outside the Spoon; the package contains only reusable code and example settings. Existing files are ignored when the watcher starts, and magnet links are not handled.
+
+**Trigger:** New `.torrent` in Downloads · [Download](https://github.com/manos/Spoons/raw/main/Spoons/TorrentToQbit.spoon.zip) · [Setup and details](Source/TorrentToQbit.spoon/README.md)
+
 ## Requirements
 
 macOS, Hammerspoon, and Accessibility permission are required. PersonalSafari also requires permission to control Safari. These are independently distributed Spoons, not part of the official Hammerspoon collection.
@@ -72,6 +83,9 @@ hs.loadSpoon("PasteToPicker")
 spoon.PasteToPicker:bindHotkeys({
   pasteImageToPicker = {{"ctrl", "alt", "cmd"}, "V"},
 })
+
+-- First create the private config described in TorrentToQbit's setup guide.
+hs.loadSpoon("TorrentToQbit"):start()
 ```
 
 See PersonalSafari's README for its one-time target-window selection and optional default-browser setup. To keep Hammerspoon out of the Dock and app switcher, add `hs.dockIcon(false)` to your own configuration; this affects Hammerspoon globally.
@@ -84,7 +98,7 @@ If you already use [SpoonInstall](https://www.hammerspoon.org/Spoons/SpoonInstal
 hs.loadSpoon("SpoonInstall")
 spoon.SpoonInstall.repos.manos = {
   url = "https://github.com/manos/Spoons",
-  desc = "Safari and clipboard utilities",
+  desc = "Safari, clipboard, and download utilities",
   branch = "main",
 }
 spoon.SpoonInstall:andUse("SafariTabGroups", {
@@ -102,6 +116,8 @@ This repository contains reusable source, synthetic tests, documentation, and in
 The Spoons contain no analytics or telemetry. PersonalSafari reads clicked link addresses to open them in Safari and stores the selected window/process identity and previous browser handler in local Hammerspoon settings. SafariTabGroups reads group names from Safari's native menu while the chooser is in use. PasteToPicker writes the clipboard image to a local temporary PNG and automatically accepts the file picker, which may start an upload through the destination app; see its README for retention and file-permission details. Opening a web link or submitting a file through the destination application has that application's normal network behavior.
 
 AirPodsMeet listens to a narrowly filtered local system-log stream and inspects Safari's accessible call controls after a matching gesture. It does not capture microphone audio or save logs, meeting addresses, or page contents. Its two bundled voice clips were synthesized from the fixed words “Muted” and “Unmuted”; playback is entirely local.
+
+TorrentToQbit reads new torrent files from the configured download folder and sends their metadata to your configured qBittorrent server over HTTPS. Its host and login stay in a separate private config file; session cookies stay in memory. Successful torrent hashes and timestamps are stored locally to avoid repeat uploads. Neither the config nor your downloaded files are included in the source or ZIP.
 
 ## Development
 
