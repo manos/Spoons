@@ -1,13 +1,15 @@
 # MissionControlSend
 
 Open Mission Control with **Control–↑**, then **Shift-click a window thumbnail**
-to send that window to **Desktop 2** on the same display. Release Shift after
+to send that window to the **next desktop** on the same display, wrapping from
+the last desktop to the first. Release Shift after
 clicking. The Spoon automates dragging the thumbnail to the desktop strip and
 checks that the window actually moved. It is intended to leave Mission Control
 open on the original desktop.
 
-**Experimental: automated checks pass, but a physical Shift-click and window
-move on the target Mac have not yet been verified.**
+**Experimental:** physical Shift-click and next-desktop movement have been
+confirmed on macOS 27.2.1. Accessibility layouts can vary across macOS versions
+and applications; ambiguous windows are deliberately skipped.
 
 ## Install
 
@@ -17,7 +19,7 @@ Place `MissionControlSend.spoon` in `~/.hammerspoon/Spoons/` and add:
 hs.loadSpoon('MissionControlSend'):start()
 ```
 
-To choose another destination, set it before starting:
+To always use a fixed destination instead, set it before starting:
 
 ```lua
 hs.loadSpoon('MissionControlSend')
@@ -25,7 +27,8 @@ spoon.MissionControlSend.desktop = 2
 spoon.MissionControlSend:start()
 ```
 
-Desktop numbers mean ordinary desktops in their current Mission Control order
+The default (`desktop = nil`) chooses the next ordinary desktop. Explicit
+desktop numbers mean ordinary desktops in their current Mission Control order
 on the clicked window's display. Full-screen app spaces do not count. The target
 desktop must already exist. This does not create desktops or change macOS's
 setting for automatically reordering Spaces.
@@ -40,8 +43,12 @@ setting for automatically reordering Spaces.
   returns to the clicked position. Real mouse or keyboard input cancels work.
 - Windows already on the target desktop stay there. Full-screen windows,
   windows assigned to multiple desktops, and ambiguous thumbnail matches are
-  skipped. Matching prefers exposed window IDs and otherwise requires a unique
-  app/title/source-desktop match. App and window names are never logged.
+  skipped. Matching prefers exposed window IDs, then a single eligible window
+  from the identified app on the source desktop. If that app has several
+  eligible windows, a unique title match is required. App and window names are
+  never logged.
+- Desktop-thumbnail animation is followed without changing the destination's
+  identity. A change to the actual desktop order still cancels the drag.
 - Moves are checked against actual desktop membership. A failed move is reported
   without an automatic retry. Mission Control or desktop-layout changes abort
   the operation. Interrupting an in-progress drag may close Mission Control.
@@ -51,8 +58,9 @@ setting for automatically reordering Spaces.
 
 The Spoon supports the WindowManager accessibility layout used by recent macOS
 versions and the older Dock layout. These interfaces are undocumented and can
-change. `lastResult` exposes a status string for troubleshooting; it contains no
-window titles or contents.
+change. `lastResult` and `lastCaptureReason` expose status strings for
+troubleshooting; they contain no window titles or contents. `lastError` keeps
+the most recent Lua error in memory, without writing a log file.
 
 ## Implementation notes
 

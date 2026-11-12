@@ -60,26 +60,37 @@ local pointer={x=150,y=250}
 local shift=false
 local posts={}
 local downNumber=nil
+local animateDesktop=false
+local reorderOnDrag=false
+local desktopOrder={11,99,22}
+local activeSpace=11
 hs.application={get=function(bundle) if bundle=='com.apple.WindowManager' then return {} elseif bundle=='example.app' then return app end end}
 hs.axuielement={applicationElement=function() return root end}
 hs.screen={allScreens=function() return {screen} end}
 hs.window={get=function(id) if id==200 then return window end end,visibleWindows=function() return {window} end}
-hs.spaces={spacesForScreen=function() return {11,99,22} end,spaceType=function(id) return id==99 and 'fullscreen' or 'user' end,
-  activeSpaceOnScreen=function() return 11 end,windowSpaces=function() return {currentSpace} end}
+hs.spaces={spacesForScreen=function() return desktopOrder end,spaceType=function(id) return id==99 and 'fullscreen' or 'user' end,
+  activeSpaceOnScreen=function() return activeSpace end,windowSpaces=function() return {currentSpace} end}
 hs.mouse={absolutePosition=function() return pointer end}
 hs.eventtap.checkKeyboardModifiers=function() return shift and {shift=true} or {} end
 hs.eventtap.event.properties={eventSourceUserData=1,mouseEventNumber=2,mouseEventClickState=3,mouseEventDeltaX=4,mouseEventDeltaY=5}
 local function generated(kind,point)
  local props={}
- local e={rawFlags=function(self) return self end,setProperty=function(self,k,v) props[k]=v; return self end}
+ local e={rawFlags=function(self) return self end,setProperty=function(self,k,v)
+  if k==4 or k==5 then assert(v%1==0,'native mouse deltas must be integers') end
+  props[k]=v; return self
+ end}
  e.post=function()
   assert(props[1]==client._eventTag,'all generated input must carry a recursion marker')
   posts[#posts+1]={kind=kind,point=point,number=props[2]}
-  if kind==types.leftMouseDown then downNumber=props[2]
-  elseif kind==types.leftMouseDragged then assert(props[2]==downNumber,'drag must share its mouse event number')
+  if kind==types.leftMouseDown then
+   downNumber=props[2]
+   if animateDesktop then bar.AXChildren[3].AXPosition={x=535,y=50} end
+  elseif kind==types.leftMouseDragged then
+   assert(props[2]==downNumber,'drag must share its mouse event number')
+   if reorderOnDrag then desktopOrder={11,22,99} end
   elseif kind==types.leftMouseUp then
    assert(props[2]==downNumber,'release must share its mouse event number')
-   if point.x==450 and point.y==50 and not ignoreDrop then currentSpace=22 end
+   if point.x==bar.AXChildren[3].AXPosition.x and point.y==50 and not ignoreDrop then currentSpace=22 end
    downNumber=nil
   end
  end
@@ -90,6 +101,11 @@ hs.eventtap.event.newKeyEvent=function() return generated('key',{}) end
 client._running=true
 local candidate=assert(client:_candidate(pointer))
 assert(candidate.id==200 and candidate.target==22,'Desktop 2 counts ordinary desktops, skipping fullscreen spaces')
+activeSpace=22; assert(client:_target(screen)==11,'next desktop must wrap from the last to the first'); activeSpace=11
+thumb.AXTitle='Fi'
+assert(client:_candidate(pointer),'a unique app window must still resolve when Mission Control shortens its title to two characters')
+secondWindow=true; assert(not client:_candidate(pointer),'short titles must not guess between multiple app windows'); secondWindow=false
+thumb.AXTitle='Fixture window'
 secondWindow=true; assert(not client:_candidate(pointer),'ambiguous thumbnail titles must pass through'); secondWindow=false
 thumb.AXIdentifier='example.app.space.22'; assert(not client:_candidate(pointer),'hidden thumbnails from another space must be ignored'); thumb.AXIdentifier='example.app.space.11'
 display.AXChildren={thumb}; assert(not client:_candidate(pointer),'App Exposé without a desktop strip must pass through')
@@ -105,6 +121,14 @@ timers={}; client._pending=candidate; shift=true; client:_begin(candidate)
 assert(#posts==0 and #timers==1,'wait for Shift release before generating drag')
 shift=false; drain()
 assert(currentSpace==22 and client.lastResult=='moved' and not downNumber,'drag must land on selected desktop and verify')
+currentSpace=11; posts={}; timers={}; animateDesktop=true
+client._pending=candidate; client:_begin(candidate); drain()
+assert(currentSpace==22 and client.lastResult=='moved','desktop thumbnail animation must not cancel a move to the same desktop')
+animateDesktop=false; bar.AXChildren[3].AXPosition={x=450,y=50}
+currentSpace=11; posts={}; timers={}; reorderOnDrag=true
+client._pending=candidate; client:_begin(candidate); drain()
+assert(currentSpace==11 and client.lastResult=='canceled_or_failed' and not downNumber,'a real desktop reorder must still cancel and release the mouse')
+reorderOnDrag=false; desktopOrder={11,99,22}
 currentSpace=11; posts={}; timers={}; ignoreDrop=true
 client._pending=candidate; client:_begin(candidate); drain()
 assert(client.lastResult=='canceled_or_failed','ignored native drag must not report success')
@@ -117,4 +141,4 @@ assert(#posts==1 and not client._moving,'real input cancels before pressing the 
 client._pending=candidate; timers={}; client:_begin(candidate)
 client:stop(); drain()
 assert(not client._moving and not client._running,'stop cancels pending work')
-print('PASS MissionControlSend desktop numbering, ambiguous/hidden thumbnails, modifier release, verified drag, ignored-drop failure and cancellation')
+print('PASS MissionControlSend desktop numbering, ambiguous/hidden thumbnails, animated destination, reorder cancellation, modifier release and verified drag')

@@ -1,6 +1,6 @@
 --- === MissionControlSend ===
 --- Shift-click a Mission Control window to send it to another desktop.
-local obj={name='MissionControlSend',version='0.1.0',desktop=2,_eventTag=0x4d4353,_eventNumber=32000}
+local obj={name='MissionControlSend',version='0.2.0',_eventTag=0x4d4353,_eventNumber=32000}
 
 function obj._inside(p,f)
   return f and p.x>=f.x and p.x<f.x+f.w and p.y>=f.y and p.y<f.y+f.h
@@ -89,11 +89,14 @@ function obj:_thumbnails(display,active)
 end
 
 function obj:_window(thumbnail,screen,source)
+  self._matchReason='no_window_match'
   local ids=thumbnail.AXWindowsIDs
   local identifier=thumbnail.AXIdentifier or ''
   local bundle=identifier:match('^(.-)%.space%.%d+$')
   local windows={}
-  if type(ids)=='table' and #ids==1 and type(ids[1])=='number' then
+  local explicitID=type(ids)=='table' and #ids==1 and type(ids[1])=='number'
+  if type(ids)=='table' and #ids>1 then self._matchReason='grouped_windows'; return nil end
+  if explicitID then
     local w=hs.window.get(ids[1]); if w then windows={w} end
   elseif bundle then
     local app=hs.application.get(bundle)
@@ -103,14 +106,23 @@ function obj:_window(thumbnail,screen,source)
       windows=app:allWindows()
     end
   else windows=hs.window.visibleWindows() end
-  local match
+  local eligible={}
   for _,w in ipairs(windows) do
     self:_budget()
     local spaces=hs.spaces.windowSpaces(w) or {}
     local s=w:screen()
     if w:isStandard() and not w:isFullScreen() and s and s:getUUID()==screen:getUUID()
-      and #spaces==1 and spaces[1]==source and self._titleMatches(thumbnail.AXTitle,w:title()) then
-      if match then return nil end -- identical titles are ambiguous; never guess
+      and #spaces==1 and spaces[1]==source then
+      eligible[#eligible+1]=w
+    end
+  end
+  -- A unique native ID or a single eligible window from the identified app
+  -- does not depend on Mission Control's aggressively shortened title.
+  if #eligible==1 and (explicitID or bundle) then return eligible[1] end
+  local match
+  for _,w in ipairs(eligible) do
+    if self._titleMatches(thumbnail.AXTitle,w:title()) then
+      if match then self._matchReason='ambiguous_window'; return nil end
       match=w
     end
   end
@@ -118,22 +130,29 @@ function obj:_window(thumbnail,screen,source)
 end
 
 function obj:_target(screen)
-  local count=0
+  local desktops={}
   for _,space in ipairs(hs.spaces.spacesForScreen(screen) or {}) do
-    if hs.spaces.spaceType(space)=='user' then
-      count=count+1
-      if count==self.desktop then return space end
-    end
+    if hs.spaces.spaceType(space)=='user' then desktops[#desktops+1]=space end
+  end
+  if self.desktop then return desktops[self.desktop] end
+  if #desktops<2 then return nil end
+  local active=hs.spaces.activeSpaceOnScreen(screen)
+  for i,space in ipairs(desktops) do
+    if space==active then return desktops[i%#desktops+1] end
   end
 end
 
 function obj:_candidate(point)
+  self.lastCaptureReason='mission_control_not_visible'
   for _,display in ipairs(self:_displays()) do
+    self.lastCaptureReason='screen_or_desktop_strip'
     local screen=self:_screen(display)
     if screen and self._inside(point,screen:fullFrame()) and not self._inside(point,display.list.AXFrame) then
       local source=hs.spaces.activeSpaceOnScreen(screen)
       local target=self:_target(screen)
+      self.lastCaptureReason='no_destination'
       if target and hs.spaces.spaceType(source)=='user' then
+        self.lastCaptureReason='hit_not_in_active_thumbnails'
         local hit=display.root:elementAtPosition(point)
         local ancestors={}
         for _=1,6 do if not hit then break end; ancestors[#ancestors+1]=hit; hit=hit.AXParent end
@@ -141,6 +160,7 @@ function obj:_candidate(point)
           for _,ancestor in ipairs(ancestors) do
             if thumbnail==ancestor and self._inside(point,thumbnail.AXFrame) then
               local window=self:_window(thumbnail,screen,source)
+              self.lastCaptureReason=window and 'matched' or self._matchReason
               if window then return {id=window:id(),pid=window:application():pid(),source=source,target=target,screen=screen:getUUID(),point=point} end
             end
           end
@@ -176,8 +196,8 @@ function obj:_later(delay,fn)
   self._timer=hs.timer.doAfter(delay,function()
     self._timer=nil
     if self._running and self._epoch==epoch then
-      local ok=pcall(fn)
-      if not ok then self:_finish(false,'Could not move that window.') end
+      local ok,err=pcall(fn)
+      if not ok then self.lastError=tostring(err); self:_finish(false,'Could not move that window.') end
     end
   end)
 end
@@ -188,7 +208,10 @@ function obj:_mouse(kind,point,number,previous)
     :setProperty(properties.eventSourceUserData,self._eventTag)
   if number then
     event:setProperty(properties.mouseEventNumber,number):setProperty(properties.mouseEventClickState,1)
-    if previous then event:setProperty(properties.mouseEventDeltaX,point.x-previous.x):setProperty(properties.mouseEventDeltaY,point.y-previous.y) end
+    if previous then
+      event:setProperty(properties.mouseEventDeltaX,math.floor(point.x)-math.floor(previous.x))
+        :setProperty(properties.mouseEventDeltaY,math.floor(point.y)-math.floor(previous.y))
+    end
   end
   event:post()
 end
@@ -247,27 +270,39 @@ function obj:_drag(item)
   if span<=8 then self:_finish(false); return end
   self._eventNumber=self._eventNumber+1
   local moving=self._moving
+  local layout={}
+  for i,space in ipairs(hs.spaces.spacesForScreen(screen) or {}) do layout[i]=space end
   moving.start=start; moving.number=self._eventNumber; moving.buttonDown=true
   local types=hs.eventtap.event.types
   self:_mouse(types.mouseMoved,start)
   self:_mouse(types.leftMouseDown,start,moving.number)
-  local points={{x=start.x+(target.x-start.x)*8/span,y=start.y+(target.y-start.y)*8/span}}
-  local first=points[1]
-  local steps=math.max(1,math.ceil((span-8)/80))
-  for i=1,steps do points[#points+1]={x=first.x+(target.x-first.x)*i/steps,y=first.y+(target.y-first.y)*i/steps} end
   local previous=start
+  local settled=0
   local function step(index)
     local d,_,s=self:_resolve(item)
     local fresh=d and self:_dropPoint(d,s,item.target)
-    if not fresh or distance(fresh,target)>2 then self:_finish(false,'Desktop layout changed; move canceled.'); return end
-    local point=points[index]
-    if point then
+    local currentLayout=s and hs.spaces.spacesForScreen(s) or {}
+    local sameLayout=#currentLayout==#layout
+    for i,space in ipairs(layout) do if currentLayout[i]~=space then sameLayout=false end end
+    if not fresh or not sameLayout then self:_finish(false,'Desktop layout changed; move canceled.'); return end
+    if index>60 then self:_finish(false,'Desktop animation did not settle; move canceled.'); return end
+    -- Thumbnail positions animate as the strip expands and a drag begins.
+    -- Follow the same desktop ID, while rejecting real changes to space order.
+    local remaining=distance(previous,fresh)
+    if remaining>2 then
+      settled=0
+      local length=math.min(index==1 and 8 or 80,remaining)
+      local point={x=previous.x+(fresh.x-previous.x)*length/remaining,y=previous.y+(fresh.y-previous.y)*length/remaining}
       self:_mouse(types.leftMouseDragged,point,moving.number,previous); previous=point
       self:_later(0.02,function() step(index+1) end)
     else
-      self:_mouse(types.leftMouseUp,target,moving.number); moving.buttonDown=false
-      self.lastResult='verifying'
-      self:_later(0.1,function() self:_verify(item,1) end)
+      settled=settled+1
+      if settled<3 then self:_later(0.02,function() step(index+1) end)
+      else
+        self:_mouse(types.leftMouseUp,fresh,moving.number); moving.buttonDown=false
+        self.lastResult='verifying'
+        self:_later(0.1,function() self:_verify(item,1) end)
+      end
     end
   end
   self:_later(0.02,function() step(1) end)
@@ -323,6 +358,7 @@ function obj:_event(event)
   self._deadline=hs.timer.absoluteTime()/1e9+0.12
   local ok,item=pcall(self._candidate,self,event:location())
   self._deadline=nil
+  if not ok then self.lastError=tostring(item); self.lastCaptureReason='inspection_error' end
   if not ok or not item then self.lastResult='not_a_window_thumbnail'; return false end
   self._captured=item; self._canceled=false
   self.lastResult='captured'
@@ -331,7 +367,7 @@ end
 
 function obj:start()
   self:stop()
-  assert(type(self.desktop)=='number' and self.desktop>=1 and self.desktop%1==0,'desktop must be a positive integer')
+  assert(self.desktop==nil or (type(self.desktop)=='number' and self.desktop>=1 and self.desktop%1==0),'desktop must be nil (next desktop) or a positive integer')
   self._running=true; self.lastResult='ready'
   local t=hs.eventtap.event.types
   self._tap=hs.eventtap.new({t.leftMouseDown,t.leftMouseUp,t.leftMouseDragged,t.mouseMoved,t.keyDown,t.flagsChanged},function(e) return self:_event(e) end):start()
