@@ -1,0 +1,10 @@
+[
+  {
+    "name": "MissionControlSend",
+    "desc": "Shift-click a Mission Control window to send it to the next desktop.",
+    "doc": "Shift-click a Mission Control window to send it to the next desktop.",
+    "type": "Module",
+    "items": [],
+    "version": "0.2.0"
+  }
+]

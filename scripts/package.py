@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DESCRIPTIONS = {
     'AirPodsMeet': 'Mute or unmute Safari Google Meet with your AirPods and spoken confirmation.',
     'KSheet': 'Show the current app’s menu shortcuts in a cheat sheet that closes with Escape.',
+    'MissionControlSend': 'Shift-click a Mission Control window to send it to the next desktop.',
     'PasteToPicker': 'Attach a clipboard image through a native macOS file picker.',
     'PersonalSafari': 'Shift-click links into a chosen Safari window across desktops.',
     'SafariTabGroups': 'Search and switch tab groups in the current Safari window.',

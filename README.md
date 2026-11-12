@@ -4,6 +4,7 @@ Small [Hammerspoon](https://www.hammerspoon.org/) tools for Safari and everyday 
 
 - **[AirPodsMeet](#airpodsmeet--mute-meet-without-reaching-for-your-mac)** — Mute or unmute a Safari Google Meet call with your AirPods, with spoken confirmation.
 - **[KSheet](#ksheet--remember-the-current-apps-shortcuts)** — See the current app's menu shortcuts with **⌃⌥⌘K**; **Escape** closes the sheet.
+- **[MissionControlSend](#missioncontrolsend--move-windows-to-the-next-desktop)** — **Shift-click** a window in Mission Control to send it to the next desktop.
 - **[PasteToPicker](#pastetopicker--attach-a-screenshot-without-saving-it-yourself)** — Attach a clipboard image through a file picker with **⌃⌥⌘V**.
 - **[PersonalSafari](#personalsafari--keep-personal-links-in-your-personal-window)** — **Shift-click** links into your chosen personal Safari window, even on another desktop.
 - **[SafariTabGroups](#safaritabgroups--jump-to-a-group-by-typing-its-name)** — Search and switch Safari tab groups with **⌃⌥⌘L**.
@@ -26,6 +27,16 @@ You want to use the keyboard, but cannot remember the shortcut for a command in 
 This is a fork of [ashfinal's KSheet](https://github.com/Hammerspoon/Spoons/tree/master/Source/KSheet.spoon), retaining the upstream credits and adding Escape dismissal and an offline layout. It shows shortcuts exposed in the app's menus, rather than every hidden command or website shortcut.
 
 **Shortcut:** ⌃⌥⌘K · [Download](https://github.com/manos/Spoons/raw/main/Spoons/KSheet.spoon.zip) · [Setup and details](Source/KSheet.spoon/README.md)
+
+## MissionControlSend — move windows to the next desktop
+
+You're sorting windows between desktops in Mission Control and want to send one away without dragging it into the desktop strip. Open Mission Control with **Control–↑**, **Shift-click a window thumbnail**, then release Shift. The window moves to the next ordinary desktop on that display, wrapping from the last desktop to the first.
+
+The Spoon briefly moves the pointer to perform the drag, follows the desktop thumbnail through its animation, and verifies that the window reached its destination. Real mouse or keyboard input cancels the operation. Full-screen spaces are skipped, and ambiguous windows are left alone.
+
+This is experimental and has been tested on macOS 27.2.1. It depends on macOS's Mission Control accessibility controls, which can change between versions. A fixed destination desktop can also be configured.
+
+**Gesture:** Shift-click in Mission Control · [Download](https://github.com/manos/Spoons/raw/main/Spoons/MissionControlSend.spoon.zip) · [Setup and details](Source/MissionControlSend.spoon/README.md)
 
 ## PasteToPicker — attach a screenshot without saving it yourself
 
@@ -77,6 +88,8 @@ Download a ZIP above or from [Releases](https://github.com/manos/Spoons/releases
 
 ```lua
 hs.loadSpoon("AirPodsMeet"):start()
+
+hs.loadSpoon("MissionControlSend"):start()
 
 hs.loadSpoon("KSheet")
 spoon.KSheet:bindHotkeys({
@@ -134,6 +147,8 @@ AirPodsMeet listens to a narrowly filtered local system-log stream and inspects 
 TorrentToQbit reads new torrent files from the configured download folder and sends their metadata to your configured qBittorrent server over HTTPS. Its host and login stay in a separate private config file; session cookies stay in memory. Successful torrent hashes and timestamps are stored locally to avoid repeat uploads. Neither the config nor your downloaded files are included in the source or ZIP.
 
 KSheet reads the current app's native menu shortcuts and displays them locally. This fork loads no external scripts or styles and does not store or transmit menu contents. Its upstream attribution link is an ordinary website link.
+
+MissionControlSend reads local window identities, titles, and desktop layout to identify the clicked thumbnail and verify the move. It sends no data over the network and does not save window contents or titles.
 
 ## Development
 
