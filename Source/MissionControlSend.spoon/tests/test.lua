@@ -52,10 +52,11 @@ local window={id=function() return 200 end,application=function() return app end
 app.allWindows=function() return secondWindow and {window,window} or {window} end
 local bar={AXIdentifier='mc.spaces.list',AXFrame={x=0,y=0,w=1200,h=100},AXChildren={}}
 for i=1,3 do bar.AXChildren[i]={AXRole='AXButton',AXPosition={x=150*i,y=50},AXParent=bar} end
-local thumb={AXRole='AXButton',AXIdentifier='example.app.space.11',AXTitle='Fixture window',AXFrame={x=100,y=200,w=200,h=200}}
+local thumb={AXRole='AXButton',AXIdentifier='example.app.space.11',AXTitle='Fixture window',AXFrame={x=100,y=200,w=200,h=200},pid=function() return 300 end}
 local display={AXIdentifier='mc.display',AXFrame=screen:fullFrame(),AXChildren={thumb,{AXIdentifier='mc.spaces',AXChildren={bar}}}}
 thumb.AXParent=display
-local root={AXChildren={display},setTimeout=function() return true end,elementAtPosition=function() return thumb end}
+local hitOverride=nil
+local root={AXChildren={display},pid=function() return 300 end,setTimeout=function() return true end,elementAtPosition=function() return hitOverride or thumb end}
 local pointer={x=150,y=250}
 local shift=false
 local posts={}
@@ -69,6 +70,7 @@ hs.axuielement={applicationElement=function() return root end}
 hs.screen={allScreens=function() return {screen} end}
 hs.window={get=function(id) if id==200 then return window end end,visibleWindows=function() return {window} end}
 hs.spaces={spacesForScreen=function() return desktopOrder end,spaceType=function(id) return id==99 and 'fullscreen' or 'user' end,
+  spaceDisplay=function(id) return (id==11 or id==22 or id==99) and 'fixture-screen' or 'other-screen' end,
   activeSpaceOnScreen=function() return activeSpace end,windowSpaces=function() return {currentSpace} end}
 hs.mouse={absolutePosition=function() return pointer end}
 hs.eventtap.checkKeyboardModifiers=function() return shift and {shift=true} or {} end
@@ -108,6 +110,22 @@ secondWindow=true; assert(not client:_candidate(pointer),'short titles must not 
 thumb.AXTitle='Fixture window'
 secondWindow=true; assert(not client:_candidate(pointer),'ambiguous thumbnail titles must pass through'); secondWindow=false
 thumb.AXIdentifier='example.app.space.22'; assert(not client:_candidate(pointer),'hidden thumbnails from another space must be ignored'); thumb.AXIdentifier='example.app.space.11'
+hitOverride={AXRole='AXButton',AXIdentifier='other.app.space.22',AXParent=display,pid=function() return 300 end}
+assert(client:_candidate(pointer),'a hidden hit from another desktop must not mask the sole visible thumbnail')
+hitOverride.AXIdentifier='other.app.space.11'
+assert(not client:_candidate(pointer),'a different visible control on the same desktop must not be bypassed')
+hitOverride.AXIdentifier='other.app.space.77'
+assert(not client:_candidate(pointer),'a hit from another display must not be bypassed')
+hitOverride.AXIdentifier='other.app.space.22'; hitOverride.pid=function() return 999 end
+assert(not client:_candidate(pointer),'a hit from another process must not be bypassed')
+hitOverride.pid=function() return 300 end
+display.AXChildren[#display.AXChildren+1]={AXRole='AXButton',AXIdentifier='second.app.space.11',AXFrame=thumb.AXFrame}
+assert(not client:_candidate(pointer),'overlapping visible thumbnails must not be guessed')
+table.remove(display.AXChildren)
+activeSpace=22; currentSpace=22; thumb.AXIdentifier='example.app.space.22'; hitOverride.AXIdentifier='other.app.space.11'
+local returning=assert(client:_candidate(pointer))
+assert(returning.source==22 and returning.target==11,'hidden-hit fallback must work on the second desktop and wrap to the first')
+activeSpace=11; currentSpace=11; thumb.AXIdentifier='example.app.space.11'; hitOverride=nil
 display.AXChildren={thumb}; assert(not client:_candidate(pointer),'App Exposé without a desktop strip must pass through')
 display.AXChildren={thumb,{AXIdentifier='mc.spaces',AXChildren={bar}}}
 local function drain()

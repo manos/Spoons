@@ -47,6 +47,9 @@ setting for automatically reordering Spaces.
   from the identified app on the source desktop. If that app has several
   eligible windows, a unique title match is required. App and window names are
   never logged.
+- If macOS reports a hidden thumbnail from another desktop under the pointer,
+  the Spoon uses the sole visible thumbnail at that position on the active
+  desktop. Overlapping or ambiguous visible thumbnails are still skipped.
 - Desktop-thumbnail animation is followed without changing the destination's
   identity. A change to the actual desktop order still cancels the drag.
 - Moves are checked against actual desktop membership. A failed move is reported

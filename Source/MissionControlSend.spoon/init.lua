@@ -1,6 +1,6 @@
 --- === MissionControlSend ===
 --- Shift-click a Mission Control window to send it to another desktop.
-local obj={name='MissionControlSend',version='0.2.0',_eventTag=0x4d4353,_eventNumber=32000}
+local obj={name='MissionControlSend',version='0.2.1',_eventTag=0x4d4353,_eventNumber=32000}
 
 function obj._inside(p,f)
   return f and p.x>=f.x and p.x<f.x+f.w and p.y>=f.y and p.y<f.y+f.h
@@ -155,8 +155,11 @@ function obj:_candidate(point)
         self.lastCaptureReason='hit_not_in_active_thumbnails'
         local hit=display.root:elementAtPosition(point)
         local ancestors={}
-        for _=1,6 do if not hit then break end; ancestors[#ancestors+1]=hit; hit=hit.AXParent end
+        local ancestor=hit
+        for _=1,6 do if not ancestor then break end; ancestors[#ancestors+1]=ancestor; ancestor=ancestor.AXParent end
+        local covering={}
         for _,thumbnail in ipairs(self:_thumbnails(display,source)) do
+          if self._inside(point,thumbnail.AXFrame) then covering[#covering+1]=thumbnail end
           for _,ancestor in ipairs(ancestors) do
             if thumbnail==ancestor and self._inside(point,thumbnail.AXFrame) then
               local window=self:_window(thumbnail,screen,source)
@@ -164,6 +167,17 @@ function obj:_candidate(point)
               if window then return {id=window:id(),pid=window:application():pid(),source=source,target=target,screen=screen:getUUID(),point=point} end
             end
           end
+        end
+        -- WindowManager can hit-test an invisible thumbnail from another
+        -- desktop. Recover only when exactly one active-desktop thumbnail
+        -- covers the point, and the hidden hit belongs to this display/owner.
+        local hitSpace=hit and tonumber((hit.AXIdentifier or ''):match('%.space%.(%d+)$'))
+        if display.modern and hitSpace and hitSpace~=source and hit.AXRole=='AXButton'
+          and hs.spaces.spaceDisplay(hitSpace)==screen:getUUID()
+          and hit:pid()~=nil and hit:pid()==display.root:pid() and #covering==1 then
+          local window=self:_window(covering[1],screen,source)
+          self.lastCaptureReason=window and 'matched_visible_thumbnail' or self._matchReason
+          if window then return {id=window:id(),pid=window:application():pid(),source=source,target=target,screen=screen:getUUID(),point=point} end
         end
       end
     end
