@@ -1,5 +1,5 @@
 --- === PasteToPicker ===
---- Paste a clipboard image into a native file picker.
+--- Save a clipboard image in Finder or attach it through a native file picker.
 --
 -- Press the hotkey while a native file picker (NSOpenPanel) is
 -- focused. If the clipboard holds an image, it's saved to /tmp and the path
@@ -11,7 +11,7 @@
 
 local obj = {
   name = "PasteToPicker",
-  version = "1.1.0",
+  version = "1.2.0",
   author = "manos",
   license = "MIT - see LICENSE",
   homepage = "https://github.com/manos/Spoons",
@@ -66,18 +66,54 @@ local function timestamp()
   return os.date("%Y%m%d-%H%M%S")
 end
 
+local function saveInFinder(image)
+  local ok, folder = hs.osascript.applescript([[
+    tell application "Finder"
+      if not frontmost then return missing value
+      if (count of windows) = 0 then return POSIX path of (desktop as alias)
+      if collapsed of front window then return POSIX path of (desktop as alias)
+      if class of front window is not Finder window then return missing value
+      return POSIX path of (target of front window as alias)
+    end tell
+  ]])
+  if not ok or type(folder) ~= "string" or hs.fs.attributes(folder, "mode") ~= "directory" then
+    hs.alert.show("Open a Finder folder to save the image")
+    return "error"
+  end
+  local base = folder:gsub("/+$", "") .. "/clipboard-" .. timestamp()
+  local filename = base .. ".png"
+  local suffix = 2
+  while hs.fs.symlinkAttributes(filename) do
+    filename = string.format("%s-%d.png", base, suffix)
+    suffix = suffix + 1
+  end
+  if not image:saveToFile(filename, "png") then
+    hs.alert.show("Couldn't save the image in this folder")
+    return "error"
+  end
+  hs.alert.show("Saved " .. filename:match("[^/]+$"))
+  return "saved"
+end
+
 function obj:pasteImageToPicker()
   if self._operation then return end
   local app = hs.application.frontmostApplication()
   local application = app and hs.axuielement.applicationElement(app)
-  if not application or not pickerWindow(application) then
-    hs.alert.show("Open a file picker first")
+  local picker = application and pickerWindow(application)
+  local inFinder = app and app:bundleID() == "com.apple.finder"
+  if not picker and not inFinder then
+    hs.alert.show("Open a Finder folder or file picker first")
     return
   end
 
   local image = hs.pasteboard.readImage()
   if not image then
     hs.alert.show("No image in clipboard")
+    return
+  end
+
+  if not picker then
+    self.lastResult = {state = saveInFinder(image)}
     return
   end
 

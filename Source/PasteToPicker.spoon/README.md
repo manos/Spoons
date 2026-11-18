@@ -4,6 +4,8 @@ Attach a clipboard image when a website offers **Choose File** but does not acce
 
 For example: copy a screenshot with **Control–Shift–Command–4**, open an attachment picker, then press **⌃⌥⌘V**. PasteToPicker creates a temporary PNG, selects it, presses Open/Upload, and waits for the picker to close. The app receives the image; any separate Send or Publish button remains yours to press.
 
+In Finder, press **⌃⌥⌘V** to save the image in the current tab’s folder. With no window open, Finder saves it to the Desktop. The file is named `clipboard-YYYYMMDD-HHMMSS.png`, with a numbered suffix if the name is taken. macOS may ask you to allow Hammerspoon to control Finder the first time.
+
 ## Install and configure
 
 Install `PasteToPicker.spoon` in `~/.hammerspoon/Spoons/`, then add:
@@ -23,7 +25,7 @@ It waits for modifier release and the native path field, verifies the typed file
 
 ## Privacy and temporary files
 
-Images are written locally to `/tmp/clipboard-YYYYMMDD-HHMMSS.png`. The shortcut automatically accepts the picker, so the destination app may immediately upload the image. The Spoon itself makes no network requests. Files are not automatically removed by this Spoon; remove them when you no longer need them. Permissions follow the Hammerspoon process's file-creation defaults. Filenames have one-second precision, so repeated invocations within one second can reuse a filename.
+In file pickers, images are written locally to `/tmp/clipboard-YYYYMMDD-HHMMSS.png`. The shortcut automatically accepts the picker, so the destination app may immediately upload the image. The Spoon itself makes no network requests. Files are not automatically removed by this Spoon; remove them when you no longer need them. Permissions follow the Hammerspoon process's file-creation defaults. Filenames have one-second precision, so repeated invocations within one second can reuse a filename.
 
 `spoon.PasteToPicker.lastResult` contains progress, timing and path-match status, without image contents or filenames. A `submitted` result means the picker closed after its Open/Upload button was pressed; it does not verify a network upload or send a message. No window-content dump shortcut is included in this distribution.
 

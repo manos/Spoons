@@ -5,7 +5,7 @@ Small [Hammerspoon](https://www.hammerspoon.org/) tools for Safari and everyday 
 - **[AirPodsMeet](#airpodsmeet--mute-meet-without-reaching-for-your-mac)** — Mute or unmute a Safari Google Meet call with your AirPods, with spoken confirmation.
 - **[KSheet](#ksheet--remember-the-current-apps-shortcuts)** — See the current app's menu shortcuts with **⌃⌥⌘K**; **Escape** closes the sheet.
 - **[MissionControlSend](#missioncontrolsend--move-windows-to-the-next-desktop)** — **Shift-click** a window in Mission Control to send it to the next desktop.
-- **[PasteToPicker](#pastetopicker--attach-a-screenshot-without-saving-it-yourself)** — Attach a clipboard image through a file picker with **⌃⌥⌘V**.
+- **[PasteToPicker](#pastetopicker--attach-a-screenshot-without-saving-it-yourself)** — Save a clipboard image in the current Finder folder or attach it through a file picker with **⌃⌥⌘V**.
 - **[PersonalSafari](#personalsafari--keep-personal-links-in-your-personal-window)** — **Shift-click** links into your chosen personal Safari window, even on another desktop.
 - **[SafariTabGroups](#safaritabgroups--jump-to-a-group-by-typing-its-name)** — Search and switch Safari tab groups with **⌃⌥⌘L**.
 - **[TorrentToQbit](#torrenttoqbit--send-downloaded-torrents-to-your-server)** — Download a `.torrent`, choose a category, and send it to your qBittorrent server.
@@ -43,6 +43,8 @@ This is experimental and has been tested on macOS 27.2.1. It depends on macOS's 
 You have an image on the clipboard, but a website only offers **Choose File**. Normally you would save the image, find it in the upload dialog, and click Open. PasteToPicker handles those steps from the keyboard.
 
 For example, copy a screenshot with **Control–Shift–Command–4**, click a website's upload button, then press **⌃⌥⌘V** in the native file picker and release the keys. The Spoon saves a temporary PNG, enters its path, and presses the picker's Open/Upload button. The dialog closes and the image is handed to the app.
+
+In Finder, press **⌃⌥⌘V** to save the clipboard image as a timestamped PNG in the folder you’re viewing. With no Finder window open, it saves to the Desktop.
 
 It works with clipboard images and native macOS Open dialogs, including Safari upload pickers. It does not paste text or operate custom website file choosers. Accepting the picker may start an upload immediately; a separate Send or Publish button in the app remains yours to press.
 
@@ -140,7 +142,7 @@ Use either manual setup or SpoonInstall for a given Spoon. SpoonInstall's `andUs
 
 This repository contains reusable source, synthetic tests, documentation, and installable archives. It does not include personal Hammerspoon configuration, settings, browser profiles, browsing history, clipboard images, diagnostic captures, or credentials.
 
-The Spoons contain no analytics or telemetry. PersonalSafari reads clicked link addresses to open them in Safari and stores the selected window/process identity and previous browser handler in local Hammerspoon settings. SafariTabGroups reads group names from Safari's native menu while the chooser is in use. PasteToPicker writes the clipboard image to a local temporary PNG and automatically accepts the file picker, which may start an upload through the destination app; see its README for retention and file-permission details. Opening a web link or submitting a file through the destination application has that application's normal network behavior.
+The Spoons contain no analytics or telemetry. PersonalSafari reads clicked link addresses to open them in Safari and stores the selected window/process identity and previous browser handler in local Hammerspoon settings. SafariTabGroups reads group names from Safari's native menu while the chooser is in use. PasteToPicker saves a PNG in the current folder in Finder. In a file picker, it writes a temporary PNG and automatically accepts the dialog, which may start an upload through the destination app; see its README for retention and file-permission details. Opening a web link or submitting a file through the destination application has that application's normal network behavior.
 
 AirPodsMeet listens to a narrowly filtered local system-log stream and inspects Safari's accessible call controls after a matching gesture. It does not capture microphone audio or save logs, meeting addresses, or page contents. Its two bundled voice clips were synthesized from the fixed words “Muted” and “Unmuted”; playback is entirely local.
 

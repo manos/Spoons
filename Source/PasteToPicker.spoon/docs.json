@@ -1,10 +1,10 @@
 [
   {
     "name": "PasteToPicker",
-    "desc": "Attach a clipboard image through a native macOS file picker.",
-    "doc": "Attach a clipboard image through a native macOS file picker.",
+    "desc": "Save a clipboard image in Finder or attach it through a native macOS file picker.",
+    "doc": "Save a clipboard image in Finder or attach it through a native macOS file picker.",
     "type": "Module",
     "items": [],
-    "version": "1.1.0"
+    "version": "1.2.0"
   }
 ]

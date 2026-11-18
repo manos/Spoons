@@ -35,7 +35,7 @@ local function fixture(options)
     if world.go then return world.now >= world.readyAt and go or nil end
     return panel
   end
-  local app = {pid = function() return 10 end, isRunning = function() return true end}
+  local app = {bundleID = function() return options.finder and "com.apple.finder" or "test.app" end, pid = function() return 10 end, isRunning = function() return true end}
   local other = {pid = function() return 20 end}
   local ax = element({AXFocusedWindow = currentWindow,
     AXFocusedUIElement = function() return world.go and world.now >= world.readyAt and field or nil end})
@@ -54,6 +54,19 @@ local function fixture(options)
       return options.switchAt and world.now >= options.switchAt and other or app
     end},
     axuielement = {applicationElement = function() return ax end},
+    osascript = {applescript = function()
+      assert(options.finder and options.noPicker, "only query Finder for a direct save")
+      return true, options.folder
+    end},
+    fs = {
+      attributes = function(path, key)
+        assert(key == "mode")
+        return path == options.folder and options.mode or nil
+      end,
+      symlinkAttributes = function(path)
+        return options.collision and not path:match("%-2%.png$") and {} or nil
+      end,
+    },
     pasteboard = {readImage = function()
       if options.noImage then return nil end
       return {saveToFile = function(_, filename)
@@ -147,5 +160,22 @@ test("does not report success if the picker stays open", {stuck = true}, functio
 end)
 test("changing apps after path confirmation prevents submission", {switchAt = 1.15}, function(w, spoon)
   assert(w.presses == 0 and spoon.lastResult.state == "cancelled")
+end)
+test("saves a PNG directly into the current Finder folder", {
+  finder = true, noPicker = true, folder = "/my folder/", mode = "directory", collision = true,
+}, function(w, spoon)
+  assert(w.savedPath:match("^/my folder/clipboard%-%d+%-%d+%-2%.png$"))
+  assert(spoon.lastResult.state == "saved" and #w.keys == 0 and #w.timers == 0)
+end)
+test("Finder virtual view does not redirect the save", {finder = true, noPicker = true}, function(w)
+  assert(not w.savedPath and #w.alerts == 1)
+end)
+test("reports a failed Finder write", {
+  finder = true, noPicker = true, folder = "/read-only/", mode = "directory", saveFails = true,
+}, function(w, spoon)
+  assert(w.savedPath and #w.alerts == 1 and spoon.lastResult.state == "error")
+end)
+test("Finder open panel still submits the image", {finder = true}, function(w)
+  assert(w.submitted and w.savedPath:match("^/tmp/"))
 end)
 os.exit(failures == 0 and 0 or 1)
